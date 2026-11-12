@@ -1,0 +1,9 @@
+{
+  "qoderToken": "",
+  "workbuddy": {
+    "accessToken": "",
+    "refreshToken": "",
+    "expiresAt": 0,
+    "connectedAt": 0
+  }
+}

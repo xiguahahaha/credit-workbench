@@ -1,0 +1,4 @@
+# Windows 批处理是 GBK 编码 + CRLF 换行；禁止 Git 做任何行尾/编码转换，
+# 否则克隆到非 Windows 平台会退化成 LF，CMD 解析会错乱。
+*.cmd -text
+*.ps1 -text

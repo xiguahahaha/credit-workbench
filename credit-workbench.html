@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>积分工作台 · CREDIT LEDGER</title>
+<style>
+/* ============================================================
+   积分工作台 · 视觉系统 v2
+   一套结构 + 双主题变量：浅色（清晰优先）/ 深色（氛围优先）
+   ============================================================ */
+
+:root{
+  color-scheme:light;
+  --bg:#F5F3ED;
+  --surface:#FFFFFF;
+  --surface-2:#FBF9F4;
+  --surface-3:#F1EEE6;
+  --line:#E5E0D6;
+  --line-strong:#D3CCBE;
+  --text:#1E1B16;
+  --text-2:#514B41;
+  --text-3:#776F63;
+  --gold:#9A6216;
+  --gold-soft:#FBF3E4;
+  --gold-line:#E4C99A;
+  --red:#B4382B;
+  --red-soft:#FCEEEB;
+  --red-line:#EFC8C1;
+  --green:#1D7245;
+  --green-soft:#EBF5EE;
+  --green-line:#C2DFCC;
+  --teal:#0F6E68;
+  --teal-soft:#EAF4F2;
+  --teal-line:#BEDCD8;
+  --dim:#8B8377;
+  --dim-soft:#F1EEE8;
+  --dim-line:#DCD6CA;
+  --solid-bg:#211D17;
+  --solid-fg:#FFFFFF;
+  --solid-hover:#3A3329;
+  --toast-bg:#211D17;
+  --toast-fg:#FFFFFF;
+  --shadow:0 1px 2px rgba(31,27,20,.045), 0 12px 28px -22px rgba(31,27,20,.34);
+  --shadow-lg:0 2px 6px rgba(31,27,20,.055), 0 22px 48px -26px rgba(31,27,20,.38);
+  --grain:.10;
+  --page-glow:radial-gradient(1100px 520px at 8% -12%, rgba(194,148,74,.10), transparent 62%),
+              radial-gradient(900px 460px at 106% 0%, rgba(15,110,104,.055), transparent 60%);
+  --serif:'Iowan Old Style','Songti SC','STSong',Georgia,'Times New Roman',serif;
+  --sans:'PingFang SC','Microsoft YaHei','Segoe UI',system-ui,-apple-system,sans-serif;
+  --mono:'Cascadia Mono','SF Mono',Consolas,ui-monospace,monospace;
+}
+
+[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0E0D0B;
+  --surface:#171512;
+  --surface-2:#1C1914;
+  --surface-3:#231F19;
+  --line:rgba(231,205,160,.14);
+  --line-strong:rgba(231,205,160,.30);
+  --text:#F1EADA;
+  --text-2:#BFB5A4;
+  --text-3:#918879;
+  --gold:#E0B25C;
+  --gold-soft:rgba(224,178,92,.10);
+  --gold-line:rgba(224,178,92,.36);
+  --red:#E87963;
+  --red-soft:rgba(224,106,85,.13);
+  --red-line:rgba(224,106,85,.36);
+  --green:#93C79A;
+  --green-soft:rgba(143,190,147,.11);
+  --green-line:rgba(143,190,147,.30);
+  --teal:#8FBDB6;
+  --teal-soft:rgba(127,166,160,.12);
+  --teal-line:rgba(127,166,160,.32);
+  --dim:#7C7568;
+  --dim-soft:rgba(124,117,104,.14);
+  --dim-line:rgba(124,117,104,.34);
+  --solid-bg:#E0B25C;
+  --solid-fg:#1A1408;
+  --solid-hover:#F1C97A;
+  --toast-bg:#EFE3C9;
+  --toast-fg:#1A1408;
+  --shadow:0 1px 2px rgba(0,0,0,.42), 0 14px 32px -24px rgba(0,0,0,.85);
+  --shadow-lg:0 2px 8px rgba(0,0,0,.46), 0 26px 54px -28px rgba(0,0,0,.9);
+  --grain:.28;
+  --page-glow:radial-gradient(1100px 560px at 8% -12%, rgba(224,178,92,.13), transparent 62%),
+              radial-gradient(900px 500px at 108% 2%, rgba(127,166,160,.09), transparent 60%);
+}
+
+*{box-sizing:border-box}
+html{min-height:100%;background:var(--bg)}
+body{
+  margin:0;min-height:100%;
+  background:var(--bg);
+  background-image:var(--page-glow);
+  background-attachment:fixed;
+  color:var(--text);
+  font:15px/1.65 var(--sans);
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:var(--grain);
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='150' height='150'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='150' height='150' filter='url(%23n)'/></svg>");
+}
+.grain{display:none}
+button,input,select{font-family:inherit}
+.shell{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:36px 40px 64px}
+
+/* ---------------- 通用控件 ---------------- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  font:600 13.5px/1 var(--sans);letter-spacing:.01em;
+  padding:10px 16px;border:1px solid var(--line-strong);border-radius:8px;
+  background:var(--surface);color:var(--text);cursor:pointer;white-space:nowrap;
+  transition:background .18s,border-color .18s,color .18s,transform .18s,box-shadow .18s;
+}
+.btn:hover{border-color:var(--gold-line);background:var(--surface-2);color:var(--gold)}
+.btn:active{transform:translateY(1px)}
+.btn.solid{background:var(--solid-bg);border-color:var(--solid-bg);color:var(--solid-fg);box-shadow:var(--shadow)}
+.btn.solid:hover{background:var(--solid-hover);border-color:var(--solid-hover);color:var(--solid-fg)}
+.btn.danger{color:var(--text-2)}
+.btn.danger:hover{border-color:var(--red-line);background:var(--red-soft);color:var(--red)}
+.btn[disabled]{opacity:.5;cursor:default;transform:none}
+.btn:focus-visible,.linkbtn:focus-visible,.sync-item:focus-visible,.padd:focus-visible{
+  outline:2px solid var(--gold);outline-offset:2px;
+}
+.linkbtn{
+  background:none;border:none;border-bottom:1px solid var(--gold-line);
+  color:var(--gold);font:600 13px var(--sans);cursor:pointer;padding:2px 0;
+  transition:color .18s,border-color .18s;
+}
+.linkbtn:hover{color:var(--text);border-color:var(--text)}
+
+.theme-toggle{width:38px;height:38px;padding:0;border-radius:8px;flex:none}
+.theme-toggle svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.theme-toggle .i-moon{fill:currentColor;stroke:none}
+.theme-toggle .i-sun{display:none}
+[data-theme="dark"] .theme-toggle .i-moon{display:none}
+[data-theme="dark"] .theme-toggle .i-sun{display:block}
+
+/* ---------------- 页头 ---------------- */
+header.top{
+  display:flex;align-items:center;justify-content:space-between;gap:26px;flex-wrap:wrap;
+  padding:0 0 24px;border-bottom:1px solid var(--line-strong);position:relative;
+}
+header.top::after{content:"";position:absolute;left:0;bottom:-1px;width:96px;height:2px;background:var(--gold)}
+.brand{display:flex;align-items:center;gap:15px}
+.brand-mark{
+  width:46px;height:46px;border:1px solid var(--gold-line);border-radius:11px;
+  display:grid;place-items:center;flex:none;
+  font:600 13px/1 var(--mono);letter-spacing:.02em;color:var(--gold);
+  background:linear-gradient(150deg,var(--gold-soft),transparent 85%);
+  box-shadow:inset 0 0 0 3px var(--surface);
+}
+h1{margin:0;font:600 29px/1.18 var(--serif);letter-spacing:.01em;color:var(--text)}
+.brand-sub{margin:5px 0 0;font:12.5px var(--sans);letter-spacing:.07em;color:var(--text-2)}
+.top-meta{display:flex;gap:30px;margin-left:auto}
+.meta-item{display:flex;flex-direction:column;gap:5px;padding-left:16px;border-left:1px solid var(--line)}
+.meta-k{font:11.5px var(--sans);letter-spacing:.06em;color:var(--text-3)}
+.meta-v{font:600 15px var(--mono);color:var(--text);font-variant-numeric:tabular-nums}
+.meta-v em{font-style:normal;color:var(--gold)}
+.top-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+/* ---------------- 分区标题 ---------------- */
+.section-head{display:flex;align-items:center;gap:14px;margin:32px 0 16px}
+.sh-num{font:600 11px var(--mono);letter-spacing:.08em;color:var(--gold);padding:3px 7px;border:1px solid var(--gold-line);border-radius:5px;background:var(--gold-soft)}
+.section-head h2{margin:0;font:600 15px var(--sans);letter-spacing:.08em;color:var(--text)}
+.sh-line{flex:1;height:1px;background:var(--line)}
+.sh-en{font:11px var(--mono);letter-spacing:.22em;color:var(--text-3);white-space:nowrap}
+
+/* ---------------- 提示条 / 同步条 ---------------- */
+.banner{
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  margin-top:18px;padding:13px 18px;border:1px solid var(--gold-line);
+  background:var(--gold-soft);border-radius:10px;
+  font:13.5px/1.6 var(--sans);color:var(--text-2);
+}
+.banner b{color:var(--gold);font-weight:700;letter-spacing:.02em}
+.banner .spacer{flex:1}
+.syncbar{
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  margin-top:14px;padding:12px 18px;border:1px solid var(--line);
+  background:var(--surface);border-radius:10px;box-shadow:var(--shadow);
+  font:13px var(--sans);color:var(--text-2);
+}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--dim);flex:none}
+.sync-dot.ok{background:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+.sync-dot.err{background:var(--red);box-shadow:0 0 0 3px var(--red-soft)}
+.sync-dot.warn{background:var(--gold);box-shadow:0 0 0 3px var(--gold-soft)}
+.sync-list{display:flex;gap:18px;flex-wrap:wrap;margin-left:auto}
+.sync-item{
+  display:inline-flex;align-items:center;gap:7px;cursor:pointer;background:none;border:none;padding:0;
+  font:13px var(--sans);color:var(--text-2);
+}
+.sync-item:hover{color:var(--text)}
+.sync-item i{width:6px;height:6px;border-radius:50%;background:var(--dim)}
+.sync-item.ok i{background:var(--green)}
+.sync-item.err i{background:var(--red)}
+.sync-item.warn i{background:var(--gold)}
+.sync-item b{font-weight:600;color:var(--text)}
+.sync-item.err b{color:var(--red)}
+.sync-item.warn b{color:var(--gold)}
+
+/* ---------------- 总览数字卡 ---------------- */
+.stats{margin-top:0;display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.stat{
+  position:relative;overflow:hidden;background:var(--surface);border:1px solid var(--line);
+  border-radius:12px;padding:20px 22px 18px;min-height:150px;box-shadow:var(--shadow);
+}
+.stat::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,var(--gold-line),transparent 72%);opacity:.9}
+.stat.amber::before{background:linear-gradient(90deg,var(--gold),transparent 72%)}
+.stat.red::before{background:linear-gradient(90deg,var(--red),transparent 72%)}
+.stat-k{display:flex;align-items:center;gap:8px;font:12.5px var(--sans);letter-spacing:.04em;color:var(--text-2)}
+.stat-k::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--dim);flex:none}
+.stat.amber .stat-k::before{background:var(--gold)}
+.stat.red .stat-k::before{background:var(--red)}
+.stat-v{margin-top:14px;font:600 32px/1.15 var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.02em;color:var(--text)}
+.stat-v .unit{font:13px var(--sans);color:var(--text-3);margin-left:7px;letter-spacing:0}
+.stat-v .muted{color:var(--dim)}
+.stat-sub{margin-top:10px;font:13px/1.65 var(--sans);color:var(--text-2)}
+.stat-sub .row{display:flex;justify-content:flex-start;gap:7px;align-items:baseline}
+.stat-sub .unit{font:12px var(--sans);color:var(--text-3)}
+.stat-sub .muted{color:var(--text-3)}
+.stat.amber .stat-v{color:var(--gold)}
+.stat.red .stat-v{color:var(--red)}
+.stat.red .stat-k{color:var(--red)}
+
+/* ---------------- 平台账户卡 ---------------- */
+.providers{margin-top:0;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.pcard{
+  --accent:var(--gold);
+  position:relative;overflow:hidden;background:var(--surface);
+  border:1px solid var(--line);border-radius:12px;padding:20px 20px 14px;
+  display:flex;flex-direction:column;min-height:250px;box-shadow:var(--shadow);
+  transition:transform .24s cubic-bezier(.2,.7,.2,1),border-color .24s,box-shadow .24s;
+}
+.pcard::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--accent),transparent 72%);opacity:.9;
+}
+.pcard:hover{transform:translateY(-3px);border-color:var(--line-strong);box-shadow:var(--shadow-lg)}
+.pcard header{display:flex;align-items:center;gap:12px}
+.pmark{
+  width:34px;height:34px;border-radius:9px;flex:none;display:grid;place-items:center;
+  font:700 14px var(--mono);
+  color:color-mix(in srgb,var(--accent) 72%,var(--text));
+  background:color-mix(in srgb,var(--accent) 11%,var(--surface));
+  border:1px solid color-mix(in srgb,var(--accent) 24%,var(--surface));
+}
+.pcard h3{margin:0;font:600 15px var(--sans);letter-spacing:.01em;color:var(--text)}
+.punit{display:block;margin-top:2px;font:12px var(--sans);color:var(--text-3)}
+.pcard header .chip{margin-left:auto}
+.pbal{margin-top:18px;display:flex;align-items:baseline;gap:8px}
+.pbal .num{font:600 34px/1 var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.02em;color:var(--text)}
+.pbal .u{font:13px var(--sans);color:var(--text-3)}
+.tranches{list-style:none;margin:16px 0 0;padding:0;flex:1}
+.trow{
+  display:flex;align-items:center;gap:10px;padding:9px 6px;border-top:1px solid var(--line);
+  font:13.5px var(--mono);cursor:pointer;border-radius:6px;transition:background .18s;
+}
+.trow:hover{background:var(--surface-2)}
+.trow .dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex:none}
+.trow.urgent .dot{background:var(--red);box-shadow:0 0 0 3px var(--red-soft)}
+.trow.soon .dot{background:var(--gold)}
+.trow.expired .dot{background:var(--dim)}
+.trow .amt{color:var(--text);font-variant-numeric:tabular-nums;font-weight:600}
+.trow .date{margin-left:auto;color:var(--text-3);font:12px var(--sans)}
+.trow .days{width:58px;text-align:right;font:600 12px var(--sans);color:var(--text-2)}
+.trow.urgent .days{color:var(--red)}
+.trow.soon .days{color:var(--gold)}
+.trow.expired .days,.trow.expired .amt{color:var(--dim)}
+.trow.expired .amt{text-decoration:line-through}
+.pfoot{display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.padd{background:none;border:none;color:var(--gold);font:600 12.5px var(--sans);cursor:pointer;padding:2px 0}
+.padd:hover{color:var(--text)}
+.pfoot .more{font:12px var(--sans);color:var(--text-3)}
+
+/* ---------------- 面板 / 分栏 ---------------- */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:0;align-items:stretch}
+.split > .panel{display:flex;flex-direction:column}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px 24px;box-shadow:var(--shadow)}
+.panel-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px}
+.panel-head h2{margin:0;font:600 17px var(--sans);letter-spacing:.02em;color:var(--text)}
+.panel-head .hint{font:12px var(--sans);color:var(--text-3);white-space:nowrap}
+.rule{height:1px;background:var(--line);margin:14px 0 4px}
+
+/* ---------------- 策略 + 优先级队列 ---------------- */
+.strategy{
+  margin:16px 0 6px;padding:14px 18px;border-left:3px solid var(--gold);
+  background:var(--gold-soft);border-radius:0 9px 9px 0;
+  font:14px/1.85 var(--sans);color:var(--text-2);
+}
+.strategy b{color:var(--gold);font-weight:700;font-style:normal}
+.strategy .danger{color:var(--red);font-weight:600}
+ol.queue{list-style:none;margin:0;padding:0}
+.qitem{display:grid;grid-template-columns:30px 1fr auto;gap:14px;align-items:center;padding:16px 2px;border-bottom:1px solid var(--line)}
+.qitem:last-child{border-bottom:none}
+.qrank{font:600 14px var(--mono);color:var(--gold);text-align:left;line-height:1}
+.qmain .qname{font:600 14px var(--sans);color:var(--text)}
+.qmain .qname .tag{
+  margin-left:9px;padding:2px 8px;border-radius:999px;
+  font:600 11.5px var(--sans);color:var(--gold);background:var(--gold-soft);
+  border:1px solid var(--gold-line);vertical-align:1px;
+}
+.qmain .qamt{font:600 22px var(--mono);font-variant-numeric:tabular-nums;margin-top:5px;color:var(--text)}
+.qmain .qamt small{font:12.5px var(--sans);color:var(--text-3);margin-left:6px}
+.qmain .qwhy{margin-top:5px;font:13px/1.65 var(--sans);color:var(--text-2)}
+.qside{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.qside .qwhy{margin:0;font:12px var(--mono);color:var(--text-3)}
+.qside .btn{padding:8px 12px;font-size:12.5px}
+.qitem.expired{opacity:.68}
+.qitem.expired .qrank{color:var(--dim)}
+.empty{padding:36px 8px;text-align:center;font:13.5px/1.9 var(--sans);color:var(--text-2)}
+.empty b{display:block;color:var(--text);font:600 14px var(--sans);margin-bottom:6px}
+
+/* ---------------- 到期时间轴 ---------------- */
+.ladder-scroll{flex:1;min-height:0;max-height:560px;overflow:auto;padding-right:6px}
+.axis{
+  display:grid;grid-template-columns:132px 1fr 84px;gap:12px;align-items:center;
+  position:sticky;top:0;z-index:2;background:var(--surface);
+  margin:16px 0 2px;padding:4px 0 10px;border-bottom:1px solid var(--line);
+}
+.axis .ticks{position:relative;height:18px}
+.axis .tick{position:absolute;top:0;transform:translateX(-50%);font:11px var(--mono);letter-spacing:.04em;color:var(--text-3);white-space:nowrap}
+.axis .tick::after{content:"";position:absolute;left:50%;top:16px;width:1px;height:5px;background:var(--line-strong)}
+.lrow{display:grid;grid-template-columns:132px 1fr 84px;gap:12px;align-items:center;padding:10px 0;cursor:pointer}
+.lrow .llabel{font:12.5px var(--sans);color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lrow .llabel b{color:var(--text);font-weight:600}
+.lrow .lright{font:600 12px var(--mono);color:var(--text-3);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.lrow .lright.hot{color:var(--red)}
+.lrow .lright.warm{color:var(--gold)}
+.track{position:relative;height:10px;background:var(--surface-3);border-radius:999px;transition:background .18s}
+.lrow:hover .track{background:var(--dim-soft)}
+.fill{position:absolute;left:0;top:0;bottom:0;border-radius:999px;opacity:.92;transition:width .9s cubic-bezier(.2,.7,.2,1)}
+.fill.urgent{background:var(--red)}
+.fill.soon{background:var(--gold)}
+.fill.normal{background:var(--green)}
+.fill.expired{background:repeating-linear-gradient(45deg,var(--dim) 0 3px,transparent 3px 6px);opacity:.75}
+.track .cap{position:absolute;top:-3px;bottom:-3px;width:2px;border-radius:2px;background:var(--text);opacity:.55}
+.ladder-foot{margin-top:auto;padding-top:14px;display:flex;gap:16px;flex-wrap:wrap;font:12px var(--sans);color:var(--text-3)}
+.ladder-foot i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;vertical-align:0}
+
+.chip{
+  display:inline-flex;align-items:center;font:600 12px var(--sans);letter-spacing:.02em;
+  padding:4px 10px;border:1px solid;border-radius:999px;white-space:nowrap;
+}
+.chip.urgent{color:var(--red);border-color:var(--red-line);background:var(--red-soft)}
+.chip.soon{color:var(--gold);border-color:var(--gold-line);background:var(--gold-soft)}
+.chip.normal{color:var(--green);border-color:var(--green-line);background:var(--green-soft)}
+.chip.expired{color:var(--text-3);border-color:var(--dim-line);background:var(--dim-soft)}
+
+footer{
+  margin-top:38px;padding-top:18px;border-top:1px solid var(--line);
+  display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  font:12px var(--sans);color:var(--text-3);
+}
+footer .f-actions{display:flex;gap:18px}
+
+/* ---------------- 弹窗 ---------------- */
+dialog{
+  background:var(--surface);border:1px solid var(--line-strong);color:var(--text);
+  padding:0;width:min(600px,94vw);border-radius:14px;box-shadow:var(--shadow-lg);
+}
+dialog::backdrop{background:rgba(26,22,17,.42);backdrop-filter:blur(5px)}
+[data-theme="dark"] dialog::backdrop{background:rgba(0,0,0,.68)}
+dialog[open]{animation:rise .3s cubic-bezier(.2,.7,.2,1) both}
+.dlg-head{padding:24px 28px 18px;border-bottom:1px solid var(--line)}
+.dlg-head .eyebrow{display:block;margin-bottom:7px;font:10px var(--mono);letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
+.dlg-head h2{margin:0;font:600 21px var(--serif);letter-spacing:.01em;color:var(--text)}
+.dlg-body{padding:20px 28px 8px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.field{display:flex;flex-direction:column;gap:8px}
+.field.full{grid-column:1/-1}
+.field label{font:12.5px var(--sans);color:var(--text-2)}
+.field input,.field select,.tokenfield{
+  background:var(--surface-2);border:1px solid var(--line-strong);border-radius:8px;
+  color:var(--text);padding:11px 12px;font:14px var(--sans);width:100%;
+  transition:border-color .18s,box-shadow .18s;
+}
+.field input::placeholder,.tokenfield::placeholder{color:var(--text-3);opacity:.8}
+.field input[type="date"]{font-family:var(--mono)}
+.field input:focus,.field select:focus,.tokenfield:focus{
+  outline:none;border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-soft);
+}
+.dlg-foot{padding:18px 28px 22px;display:flex;align-items:center;gap:10px;border-top:1px solid var(--line);margin-top:8px}
+.dlg-foot .spacer{flex:1}
+.hintline{font:12.5px/1.6 var(--sans);color:var(--text-3);margin:0}
+.err{color:var(--red);font:13px var(--sans);min-height:16px;margin:8px 28px 0}
+
+/* 同步设置弹窗 */
+#syncDialog{width:min(660px,94vw)}
+.sync-body{padding:6px 28px 4px;display:flex;flex-direction:column}
+.sync-row{display:grid;grid-template-columns:128px 1fr auto;gap:14px;align-items:center;padding:16px 0;border-bottom:1px solid var(--line)}
+.sync-row:last-child{border-bottom:none}
+.sync-row .sname{font:600 13.5px var(--sans);color:var(--text)}
+.sync-row .sname small{display:block;margin-top:4px;font:11.5px var(--sans);color:var(--text-3);font-weight:400}
+.sync-row .sstate{font:13.5px/1.6 var(--sans);color:var(--text-2)}
+.sync-row .sstate em{font-style:normal;color:var(--green)}
+.sync-row .sstate strong{color:var(--red);font-weight:600}
+.sync-row .sact{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;align-items:center}
+.sync-row .sact .btn{padding:8px 12px;font-size:12.5px}
+.sync-row .inputwrap{grid-column:2/-1;margin-top:2px}
+.tokenfield{resize:vertical;font:13px var(--mono)}
+.sync-note{padding:8px 28px 0;font:12.5px/1.7 var(--sans);color:var(--text-3)}
+.sync-error{padding:0 28px;font:13px var(--sans);color:var(--red);min-height:16px}
+.wb-login{
+  grid-column:2/-1;margin-top:6px;padding:11px 14px;border:1px solid var(--gold-line);
+  background:var(--gold-soft);border-radius:8px;font:12.5px/1.6 var(--sans);color:var(--text-2);display:none;
+}
+.wb-login.show{display:block}
+.wb-login a{color:var(--gold);font-weight:600}
+
+/* ---------------- 杂项 ---------------- */
+#toast{
+  position:fixed;left:50%;bottom:34px;transform:translate(-50%,16px);z-index:60;
+  background:var(--toast-bg);color:var(--toast-fg);padding:11px 20px;border-radius:8px;
+  font:600 13px var(--sans);opacity:0;pointer-events:none;
+  transition:opacity .22s,transform .22s;box-shadow:var(--shadow-lg);
+}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+.reveal{animation:rise .5s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i,0)*45ms)}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+::selection{background:var(--gold-line);color:var(--text)}
+
+/* ---------------- 响应式 ---------------- */
+@media (max-width:1100px){
+  .providers,.stats{grid-template-columns:repeat(2,1fr)}
+  .split{grid-template-columns:1fr}
+  .shell{padding:30px 28px 56px}
+}
+@media (max-width:720px){
+  .shell{padding:22px 16px 44px}
+  header.top{align-items:flex-start;gap:18px}
+  h1{font-size:25px}
+  .brand-mark{width:40px;height:40px}
+  .top-meta{width:100%;order:3;margin-left:0;gap:22px}
+  .meta-item:first-child{padding-left:0;border-left:none}
+  .top-actions{order:2}
+  .providers,.stats{grid-template-columns:1fr}
+  .stat{min-height:0}
+  .section-head{margin:26px 0 12px}
+  .sh-en{display:none}
+  .panel{padding:18px 16px}
+  .axis,.lrow{grid-template-columns:100px 1fr 70px}
+  .dlg-body{grid-template-columns:1fr;padding:18px 20px 8px}
+  .dlg-head,.dlg-foot{padding-left:20px;padding-right:20px}
+  .err,.sync-note,.sync-error{margin-left:20px;margin-right:20px;padding-left:0;padding-right:0}
+  .sync-body{padding-left:20px;padding-right:20px}
+  .sync-row{grid-template-columns:100px 1fr;gap:8px}
+  .sync-row .sact{grid-column:2;justify-content:flex-start}
+  .inputwrap{grid-column:1/-1!important}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+
+</style>
+<script>
+(function(){
+  try{
+    var t = localStorage.getItem('credit-ledger-theme');
+    if(t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+  }catch(e){}
+})();
+</script>
+</head>
+<body>
+
+<div class="shell">
+  <header class="top reveal" style="--i:0">
+    <div class="brand">
+      <div class="brand-mark">C/L</div>
+      <div>
+        <h1>积分工作台</h1>
+        <p class="brand-sub">积分与额度到期管理</p>
+      </div>
+    </div>
+    <div class="top-meta">
+      <div class="meta-item">
+        <span class="meta-k">今天</span>
+        <span class="meta-v" id="todayLabel">—</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-k">最近到期</span>
+        <span class="meta-v" id="nextExpiry">—</span>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button class="btn" id="btnSync" type="button">同步</button>
+      <button class="btn" id="btnExport" type="button">导出</button>
+      <button class="btn" id="btnImport" type="button">导入</button>
+      <input type="file" id="fileInput" accept=".json,application/json" hidden>
+      <button class="btn theme-toggle" id="btnTheme" type="button" title="切换到深色模式" aria-label="切换到深色模式">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path class="i-moon" d="M20.5 14.3A8.5 8.5 0 0 1 9.7 3.5a8.5 8.5 0 1 0 10.8 10.8Z"/>
+          <g class="i-sun">
+            <circle cx="12" cy="12" r="3.6"/>
+            <path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6L17 7M7 17l-1.4 1.4"/>
+          </g>
+        </svg>
+      </button>
+      <button class="btn solid" id="btnAdd" type="button">+ 记一笔</button>
+    </div>
+  </header>
+
+  <div class="banner reveal" id="sampleBanner" style="--i:1;display:none">
+    <span><b>示例数据</b> · 用于演示看板与建议逻辑，可清空后录入你的真实积分。</span>
+    <span class="spacer"></span>
+    <button class="linkbtn" id="btnClearSample" type="button">清空示例，开始录入</button>
+  </div>
+
+  <div class="syncbar reveal" id="syncbar" style="--i:1">
+    <span class="sync-dot" id="syncDot"></span>
+    <span id="syncText">正在检查同步服务…</span>
+    <div class="sync-list" id="syncList"></div>
+    <button class="linkbtn" id="btnSyncSettings" type="button">同步设置</button>
+  </div>
+
+<div class="section-head reveal" style="--i:2">
+    <span class="sh-num">01</span><h2>总览</h2><span class="sh-line"></span><span class="sh-en">OVERVIEW</span>
+  </div>
+  <section class="stats reveal" style="--i:2" id="stats"></section>
+
+<div class="section-head reveal" style="--i:3">
+    <span class="sh-num">02</span><h2>平台账户</h2><span class="sh-line"></span><span class="sh-en">ACCOUNTS</span>
+  </div>
+  <section class="providers" id="providerCards"></section>
+
+<div class="section-head reveal" style="--i:5">
+    <span class="sh-num">03</span><h2>使用策略与时间轴</h2><span class="sh-line"></span><span class="sh-en">STRATEGY</span>
+  </div>
+  <div class="split">
+    <section class="panel reveal" style="--i:6">
+      <div class="panel-head">
+        <h2>优先使用顺序</h2>
+        <span class="hint">按到期日升序 · FIFO</span>
+      </div>
+      <div class="rule"></div>
+      <div class="strategy" id="strategy"></div>
+      <ol class="queue" id="queue"></ol>
+    </section>
+
+    <section class="panel reveal" style="--i:7">
+      <div class="panel-head">
+        <h2>到期时间轴</h2>
+        <span class="hint">横轴为剩余天数 · 刻度压缩</span>
+      </div>
+      <div class="rule"></div>
+      <div class="ladder-scroll">
+        <div class="axis" id="axis"></div>
+        <div id="ladderRows"></div>
+      </div>
+      <div class="ladder-foot">
+        <span><i style="background:var(--red)"></i>7 天内</span>
+        <span><i style="background:var(--gold)"></i>30 天内</span>
+        <span><i style="background:var(--green)"></i>安全</span>
+        <span><i style="background:repeating-linear-gradient(45deg,var(--dim) 0 3px,transparent 3px 6px)"></i>已过期</span>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <span>数据仅保存在本机浏览器</span>
+    <span class="f-actions">
+      <button class="linkbtn" id="btnResetSample" type="button">恢复示例数据</button>
+      <button class="linkbtn" id="btnWipe" type="button">清空全部</button>
+    </span>
+  </footer>
+</div>
+
+<dialog id="editor">
+  <form id="editForm" novalidate>
+    <div class="dlg-head">
+      <h2 id="dlgTitle">记一笔积分</h2>
+    </div>
+    <div class="dlg-body">
+      <div class="field">
+        <label for="fProvider">平台</label>
+        <select id="fProvider"></select>
+      </div>
+      <div class="field" id="customNameField" style="display:none">
+        <label for="fCustomName">自定义名称</label>
+        <input id="fCustomName" type="text" placeholder="例如：Kimi" maxlength="24">
+      </div>
+      <div class="field">
+        <label for="fAmount">数量</label>
+        <input id="fAmount" type="number" min="0.01" step="any" placeholder="1200" inputmode="decimal">
+      </div>
+      <div class="field">
+        <label for="fUnit">单位</label>
+        <input id="fUnit" type="text" placeholder="积分 / 次 / 额度" maxlength="8">
+      </div>
+      <div class="field">
+        <label for="fExpiry">有效期至</label>
+        <input id="fExpiry" type="date">
+      </div>
+      <div class="field">
+        <label for="fNote">备注（可选）</label>
+        <input id="fNote" type="text" placeholder="来源、批次、用途…" maxlength="40">
+      </div>
+      <p class="hintline field full" style="margin:0">该日期为最后可用日。少于 7 天标红，30 天内标黄。</p>
+    </div>
+    <p class="err" id="formErr"></p>
+    <div class="dlg-foot">
+      <button class="btn danger" id="btnDelete" type="button" style="display:none">删除</button>
+      <span class="spacer"></span>
+      <button class="btn" id="btnCancel" type="button">取消</button>
+      <button class="btn solid" type="submit">保存</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<dialog id="syncDialog">
+  <form id="syncForm">
+    <div class="dlg-head">
+      <h2>同步设置</h2>
+    </div>
+    <div class="sync-body">
+      <div class="sync-row">
+        <span class="sname">TRAE<small>自动 · 本机登录态</small></span>
+        <span class="sstate" id="traeState">检查中…</span>
+        <span class="sact"></span>
+      </div>
+      <div class="sync-row">
+        <span class="sname">WORKBUDDY<small>需一次性登录</small></span>
+        <span class="sstate" id="wbState">检查中…</span>
+        <span class="sact">
+          <button class="btn" id="wbConnect" type="button">连接</button>
+          <button class="linkbtn" id="wbDisconnect" type="button" style="display:none">断开</button>
+        </span>
+        <div class="wb-login" id="wbLoginBox"></div>
+      </div>
+      <div class="sync-row">
+        <span class="sname">QODER<small>自动 · 本机登录态</small></span>
+        <span class="sstate" id="qoderState">检查中…</span>
+        <span class="sact"><button class="linkbtn" id="qoderClear" type="button">清除</button></span>
+        <div class="inputwrap">
+          <input class="tokenfield" id="qoderToken" type="password" autocomplete="off" placeholder="jt-… 或 Cookie（可选，留空自动读 Qoder 客户端）">
+        </div>
+      </div>
+    </div>
+    <div class="sync-note">凭证只保存在本机 sync/config.json，不会上传。TRAE 只读取本机登录态。</div>
+    <div class="sync-error" id="syncError"></div>
+    <div class="dlg-foot">
+      <button class="btn danger" id="btnSyncClose" type="button">关闭</button>
+      <span class="spacer"></span>
+      <button class="btn solid" type="submit">保存并同步</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+(function(){
+  'use strict';
+
+  var DAY = 86400000;
+  var KEY = 'credit-ledger-v1';
+
+  var DEFAULT_PROVIDERS = [
+    { id:'workbuddy', name:'WORKBUDDY', unit:'积分', accent:'#B45309' },
+    { id:'trae',      name:'TRAE',      unit:'积分', accent:'#0F766E' },
+    { id:'qoder',     name:'Qoder',     unit:'Credits', accent:'#6D28D9' }
+  ];
+
+  var state = { providers: clone(DEFAULT_PROVIDERS), tranches: [], seeded: false };
+
+  /* ---------------- helpers ---------------- */
+  function clone(o){ return JSON.parse(JSON.stringify(o)); }
+  function uid(){ return (crypto && crypto.randomUUID) ? crypto.randomUUID() : 'id-' + Date.now() + '-' + Math.random().toString(16).slice(2); }
+  function pad(n){ return n < 10 ? '0' + n : '' + n; }
+  function todayStart(){ var d = new Date(); d.setHours(0,0,0,0); return d; }
+  function isoDate(d){ return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()); }
+  function addDays(n){ var d = todayStart(); d.setDate(d.getDate() + n); return isoDate(d); }
+  function parseISO(iso){ var p = iso.split('-'); return new Date(+p[0], +p[1]-1, +p[2]); }
+  function daysLeft(iso){
+    if(!iso) return 9999;
+    return Math.round((parseISO(iso).getTime() - todayStart().getTime()) / DAY);
+  }
+  function fmt(n){ return new Intl.NumberFormat('zh-CN').format(n); }
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+    });
+  }
+  function shortNote(note){
+    return String(note || '').replace(/^(WORKBUDDY|TRAE|QODER|WorkBuddy|Trae|Qoder)\s*·\s*/i, '');
+  }
+  function statusOf(d){
+    if(d < 0) return 'expired';
+    if(d <= 7) return 'urgent';
+    if(d <= 30) return 'soon';
+    return 'normal';
+  }
+  function statusText(d){
+    if(d >= 9000) return '长期有效';
+    if(d < 0) return '已过期 ' + (-d) + ' 天';
+    if(d === 0) return '今天到期';
+    if(d === 1) return '明天到期';
+    return d + ' 天后';
+  }
+  function isNoExpiry(t){
+    return !t || !t.expiry || daysLeft(t.expiry) >= 9000;
+  }
+  function shortDate(iso){
+    if(!iso) return '—';
+    var p = iso.split('-');
+    return p[1] + '-' + p[2];
+  }
+  function unitOf(t){
+    return t.unit || providerOf(t.providerId).unit || '积分';
+  }
+  function providerOf(id){
+    var p = state.providers.filter(function(x){ return x.id === id; })[0];
+    return p || { id:id, name:id, unit:'积分', accent:'#8F8879' };
+  }
+  function sumByUnit(list){
+    var m = {};
+    var order = [];
+    list.forEach(function(t){
+      var u = unitOf(t);
+      if(!(u in m)){ m[u] = 0; order.push(u); }
+      m[u] += Number(t.amount) || 0;
+    });
+    return order.map(function(u){ return fmt(Math.round(m[u]*100)/100) + ' ' + u; }).join(' · ');
+  }
+  function activeTranches(){ return state.tranches.filter(function(t){ return daysLeft(t.expiry) >= 0; }); }
+  function expiredTranches(){ return state.tranches.filter(function(t){ return daysLeft(t.expiry) < 0; }); }
+  function sortedTranches(){
+    return state.tranches.slice().sort(function(a,b){
+      var da = daysLeft(a.expiry), db = daysLeft(b.expiry);
+      if(da !== db) return da - db;
+      return Number(b.amount) - Number(a.amount);
+    });
+  }
+
+  /* ---------------- storage ---------------- */
+  function load(){
+    try{
+      var raw = localStorage.getItem(KEY);
+      if(raw){
+        var parsed = JSON.parse(raw);
+        if(parsed && Array.isArray(parsed.tranches)){
+          state.providers = (parsed.providers && parsed.providers.length) ? parsed.providers : clone(DEFAULT_PROVIDERS);
+          state.tranches = parsed.tranches;
+          state.seeded = !!parsed.seeded;
+          // 旧版遗留平台清理（豆包 / 旧 QCODE 记录）
+          state.providers = state.providers.filter(function(p){
+            return p && p.id !== 'doubao' && p.id !== 'qcode' && !/豆包/.test(p.name || '');
+          });
+          state.tranches = state.tranches.filter(function(t){
+            return t && t.providerId !== 'doubao' && t.providerId !== 'qcode';
+          });
+          if(!state.providers.some(function(p){ return p.id === 'qoder'; })){
+            var qoderDef = clone(DEFAULT_PROVIDERS).filter(function(p){ return p.id === 'qoder'; })[0];
+            if(qoderDef) state.providers.push(qoderDef);
+          }
+          if(!state.providers.length) state.providers = clone(DEFAULT_PROVIDERS);
+          return;
+        }
+      }
+    }catch(e){ /* ignore corrupt storage */ }
+    seed();
+  }
+  function save(){
+    try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){ /* storage full / private mode */ }
+  }
+  function seed(){
+    state.providers = clone(DEFAULT_PROVIDERS);
+    state.tranches = [
+      { id:uid(), providerId:'workbuddy', amount:1280, unit:'积分', expiry:addDays(5),  note:'月度奖励批次' },
+      { id:uid(), providerId:'qoder',     amount:2400, unit:'Credits', expiry:addDays(2),  note:'活动赠送' },
+      { id:uid(), providerId:'trae',      amount:860,  unit:'积分', expiry:addDays(16), note:'' },
+      { id:uid(), providerId:'trae',      amount:3000, unit:'积分', expiry:addDays(120),note:'年度额度' },
+      { id:uid(), providerId:'workbuddy', amount:600,  unit:'积分', expiry:addDays(-6), note:'已过期的批次' }
+    ];
+    state.seeded = true;
+    save();
+  }
+
+  /* ---------------- render: stats ---------------- */
+  function renderStats(){
+    var active = activeTranches();
+    var expired = expiredTranches();
+    var in30 = active.filter(function(t){ return daysLeft(t.expiry) <= 30; });
+    var in7  = active.filter(function(t){ return daysLeft(t.expiry) <= 7; });
+
+    var next = active.filter(function(t){ return !isNoExpiry(t); })
+      .sort(function(a,b){ return daysLeft(a.expiry) - daysLeft(b.expiry); })[0];
+
+    function unitRows(list){
+      var m = {}, order = [];
+      list.forEach(function(t){
+        var u = unitOf(t);
+        if(!(u in m)){ m[u] = 0; order.push(u); }
+        m[u] += Number(t.amount) || 0;
+      });
+      if(!order.length) return '<span class="muted">无</span>';
+      return order.map(function(u){
+        return '<div class="row"><span>' + fmt(Math.round(m[u]*100)/100) + '</span><span class="unit">' + esc(u) + '</span></div>';
+      }).join('');
+    }
+
+    var providersWithData = state.providers.filter(function(p){
+      return state.tranches.some(function(t){ return t.providerId === p.id; });
+    }).length;
+
+    var html = '';
+    html += '<div class="stat">'
+          +   '<div class="stat-k">在用积分 / 额度</div>'
+          +   '<div class="stat-v">' + (active.length ? active.length + '<span class="unit">笔在用</span>' : '<span class="muted">—</span>') + '</div>'
+          +   '<div class="stat-sub">' + (active.length ? unitRows(active) : '还没有录入任何积分') + '</div>'
+          +   '<div class="stat-sub" style="margin-top:10px;color:var(--dim)">' + providersWithData + ' 个平台 · ' + state.tranches.length + ' 笔记录</div>'
+          + '</div>';
+
+    html += '<div class="stat amber">'
+          +   '<div class="stat-k">30 天内到期</div>'
+          +   '<div class="stat-v">' + (in30.length ? in30.length + '<span class="unit">笔</span>' : '<span class="muted">0</span>') + '</div>'
+          +   '<div class="stat-sub">' + (in30.length ? unitRows(in30) : '暂无临期压力') + '</div>'
+          + '</div>';
+
+    html += '<div class="stat red">'
+          +   '<div class="stat-k">7 天内到期</div>'
+          +   '<div class="stat-v">' + (in7.length ? in7.length + '<span class="unit">笔</span>' : '<span class="muted">0</span>') + '</div>'
+          +   '<div class="stat-sub">' + (in7.length ? unitRows(in7) : '没有紧急到期') + '</div>'
+          + '</div>';
+
+    var nextHtml = next
+      ? (daysLeft(next.expiry) === 0 ? '<span style="color:var(--red)">今天</span>' : daysLeft(next.expiry) + '<span class="unit">天</span>')
+      : '<span class="muted">—</span>';
+    html += '<div class="stat">'
+          +   '<div class="stat-k">最近到期</div>'
+          +   '<div class="stat-v">' + nextHtml + '</div>'
+          +   '<div class="stat-sub">' + (next
+                ? esc(providerOf(next.providerId).name) + ' · ' + fmt(next.amount) + ' ' + esc(unitOf(next)) + '<br>' + esc(next.expiry)
+                : (active.length ? '暂无到期日' : '录入后自动计算')) + '</div>'
+          +   (expired.length ? '<div class="stat-sub" style="color:var(--dim);margin-top:6px">另有 ' + expired.length + ' 笔已过期</div>' : '')
+          + '</div>';
+
+    document.getElementById('stats').innerHTML = html;
+
+    document.getElementById('todayLabel').textContent =
+      new Date().getFullYear() + '.' + pad(new Date().getMonth()+1) + '.' + pad(new Date().getDate());
+
+    document.getElementById('nextExpiry').innerHTML = next
+      ? (daysLeft(next.expiry) === 0 ? '<em>今天到期</em>' : '<em>' + daysLeft(next.expiry) + ' 天</em> · ' + shortDate(next.expiry))
+      : '—';
+  }
+
+  /* ---------------- render: provider cards ---------------- */
+  function renderProviders(){
+    var host = document.getElementById('providerCards');
+    var html = '';
+    state.providers.forEach(function(p, idx){
+      var list = state.tranches.filter(function(t){ return t.providerId === p.id; });
+      var act = list.filter(function(t){ return daysLeft(t.expiry) >= 0; });
+      var bal = act.reduce(function(s,t){ return s + (Number(t.amount) || 0); }, 0);
+      var units = {};
+      act.forEach(function(t){ units[unitOf(t)] = true; });
+      var unitLabel = Object.keys(units).join(' / ') || p.unit || '积分';
+
+      var next = act.filter(function(t){ return !isNoExpiry(t); })
+        .sort(function(a,b){ return daysLeft(a.expiry) - daysLeft(b.expiry); })[0];
+      var chip = '';
+      if(next){
+        var d = daysLeft(next.expiry);
+        chip = '<span class="chip ' + statusOf(d) + '">' + (d === 0 ? '今天到期' : d + ' 天') + '</span>';
+      } else if(list.length){
+        chip = act.length
+          ? '<span class="chip normal">长期</span>'
+          : '<span class="chip expired">已过期</span>';
+      }
+
+      var rows = list.slice().sort(function(a,b){
+        var ea = daysLeft(a.expiry) < 0 ? 1 : 0;
+        var eb = daysLeft(b.expiry) < 0 ? 1 : 0;
+        if(ea !== eb) return ea - eb;
+        return daysLeft(a.expiry) - daysLeft(b.expiry);
+      });
+      var shown = rows.slice(0, 4);
+      var rowsHtml = shown.map(function(t){
+        var d = daysLeft(t.expiry);
+        var noExp = isNoExpiry(t);
+        return '<li class="trow ' + (noExp ? 'normal' : statusOf(d)) + '" data-edit="' + esc(t.id) + '" title="点击编辑">'
+             +   '<span class="dot"></span>'
+             +   '<span class="amt">' + fmt(t.amount) + '</span>'
+             +   '<span class="date">' + (noExp ? '长期有效' : shortDate(t.expiry)) + '</span>'
+             +   '<span class="days">' + (noExp ? '' : (d < 0 ? '已过期' : d + ' 天')) + '</span>'
+             + '</li>';
+      }).join('');
+
+      var more = rows.length > 4 ? '<span class="more">+' + (rows.length - 4) + ' 笔</span>' : '<span class="more">' + (rows.length ? '' : '空') + '</span>';
+
+      html += '<article class="pcard reveal" style="--i:' + (3 + Math.min(idx, 3)) + ';--accent:' + p.accent + '">'
+           +   '<header>'
+           +     '<span class="pmark">' + esc((p.name || '?').slice(0,1).toUpperCase()) + '</span>'
+           +     '<div><h3>' + esc(p.name) + '</h3><span class="punit">' + esc(unitLabel) + '</span></div>'
+           +     chip
+           +   '</header>'
+           +   '<div class="pbal"><span class="num">' + (act.length ? fmt(Math.round(bal*100)/100) : '—') + '</span><span class="u">' + esc(unitLabel) + '</span></div>'
+           +   '<ul class="tranches">' + (rowsHtml || '<li class="trow" style="cursor:default;color:var(--dim);border-top:none">还没有录入</li>') + '</ul>'
+           +   '<div class="pfoot">'
+           +     '<button class="padd" data-add="' + esc(p.id) + '" type="button">+ 添加一笔</button>'
+           +     more
+           +   '</div>'
+           + '</article>';
+    });
+    host.innerHTML = html;
+  }
+
+  /* ---------------- render: strategy + queue ---------------- */
+  function renderQueue(){
+    var active = activeTranches().sort(function(a,b){
+      var da = daysLeft(a.expiry), db = daysLeft(b.expiry);
+      if(da !== db) return da - db;
+      return Number(b.amount) - Number(a.amount);
+    });
+    var expired = expiredTranches();
+    var in7 = active.filter(function(t){ return daysLeft(t.expiry) <= 7; });
+    var in30 = active.filter(function(t){ return daysLeft(t.expiry) <= 30; });
+
+    var s = '';
+    if(!state.tranches.length){
+      s = '还没有数据。点击右上角 <b>+ 记一笔</b> 录入第一个平台的积分余额与有效期，这里会自动排出消耗顺序。';
+    } else {
+      if(expired.length){
+        s += '<span class="danger">有 ' + expired.length + ' 笔（' + sumByUnit(expired) + '）已经过期</span>，先确认平台是否支持延期或恢复，否则只能作废。 ';
+      }
+      if(in7.length){
+        var names = [];
+        in7.forEach(function(t){
+          var n = providerOf(t.providerId).name;
+          if(names.indexOf(n) === -1) names.push(n);
+        });
+        s += '未来 7 天内有 <b>' + in7.length + ' 笔</b>到期，共 <b>' + sumByUnit(in7) + '</b>：这部分是唯一的真实损失风险，' +
+             '建议先把最耗积分、可替代性最强的任务放到 <b>' + esc(names.join(' / ')) + '</b> 上跑完。';
+      } else if(in30.length){
+        s += '7 天内没有到期压力。30 天内还有 <b>' + in30.length + ' 笔</b>（' + sumByUnit(in30) + '）到期，' +
+             '可以排进下两个使用周期逐步消耗，不必一次性冲刺。';
+      } else if(active.length){
+        s += '当前没有 30 天内到期的积分，按正常节奏使用即可；新录入的批次会自动参与排序。';
+      } else {
+        s += '所有已录入的积分都已过期，建议清理记录后录入新的批次。';
+      }
+    }
+    document.getElementById('strategy').innerHTML = s;
+
+    var html = '';
+    expired.slice().sort(function(a,b){ return daysLeft(a.expiry) - daysLeft(b.expiry); }).forEach(function(t){
+      var p = providerOf(t.providerId);
+      html += '<li class="qitem expired">'
+           +   '<span class="qrank">×</span>'
+           +   '<div class="qmain">'
+           +     '<div class="qname">' + esc(p.name) + '<span class="tag">已过期</span></div>'
+           +     '<div class="qamt">' + fmt(t.amount) + '<small>' + esc(unitOf(t)) + '</small></div>'
+           +     '<div class="qwhy">有效期至 ' + esc(t.expiry) + '，已过期 ' + (-daysLeft(t.expiry)) + ' 天</div>'
+           +   '</div>'
+           +   '<div class="qside"><button class="btn danger" data-edit="' + esc(t.id) + '" type="button">处理</button></div>'
+           + '</li>';
+    });
+
+    active.slice(0, 6).forEach(function(t, i){
+      var d = daysLeft(t.expiry);
+      var noExp = isNoExpiry(t);
+      var p = providerOf(t.providerId);
+      var burn = Math.ceil((Number(t.amount) || 0) / Math.max(d, 1));
+      var why = noExp
+        ? '长期有效，没有到期压力，空闲时使用即可'
+        : (d === 0
+            ? '今天最后一天，优先消耗；建议直接用于最大批量任务'
+            : (d <= 30
+                ? '想完整用完，日均至少消耗 ' + fmt(burn) + ' ' + unitOf(t)
+                : '时间充裕，可排在临期批次之后使用'));
+      html += '<li class="qitem">'
+           +   '<span class="qrank">' + pad(i + 1) + '</span>'
+           +   '<div class="qmain">'
+           +     '<div class="qname">' + esc(p.name) + (i === 0 && !noExp ? '<span class="tag">优先</span>' : '') + '</div>'
+           +     '<div class="qamt">' + fmt(t.amount) + '<small>' + esc(unitOf(t)) + '</small></div>'
+           +     '<div class="qwhy">' + esc(why) + (t.note ? ' · ' + esc(shortNote(t.note)) : '') + '</div>'
+           +   '</div>'
+           +   '<div class="qside">'
+           +     '<span class="chip ' + statusOf(d) + '">' + statusText(d) + '</span>'
+           +     '<span class="qwhy" style="margin:0">' + esc(noExp ? '' : t.expiry) + '</span>'
+           +   '</div>'
+           + '</li>';
+    });
+
+    if(!html){
+      html = '<li class="empty"><b>暂无记录</b>还没有可用的积分记录。<br>先记一笔，工作台会替你排好顺序。</li>';
+    }
+    document.getElementById('queue').innerHTML = html;
+  }
+
+  /* ---------------- render: ladder ---------------- */
+  function renderLadder(){
+    var all = sortedTranches().filter(function(t){ return !isNoExpiry(t); });
+    var maxDays = Math.max.apply(null, all.map(function(t){ return Math.max(daysLeft(t.expiry), 0); }).concat([30]));
+    var WINDOW = Math.min(365, Math.max(30, Math.ceil(maxDays / 30) * 30));
+    function pctOf(d){
+      return Math.log(Math.min(Math.max(d, 0), WINDOW) + 1) / Math.log(WINDOW + 1) * 100;
+    }
+
+    var tickDays = [0, 7, 30, 120, 365].filter(function(d){ return d <= WINDOW; });
+    if(tickDays[tickDays.length - 1] !== WINDOW) tickDays.push(WINDOW);
+    var ticks = tickDays.map(function(d){
+      var pct = pctOf(d);
+      var tr = d === 0 ? 'translateX(0)' : (d === WINDOW ? 'translateX(-100%)' : 'translateX(-50%)');
+      return '<span class="tick" style="left:' + pct + '%;transform:' + tr + '">' + (d === 0 ? '今天' : d + '天') + '</span>';
+    }).join('');
+    document.getElementById('axis').innerHTML = '<span></span><div class="ticks">' + ticks + '</div><span></span>';
+
+    var rows = '';
+    all.forEach(function(t){
+      var d = daysLeft(t.expiry);
+      var st = statusOf(d);
+      var p = providerOf(t.providerId);
+      var pct = st === 'expired' ? 5 : Math.max(4, pctOf(d));
+      var rightCls = st === 'urgent' ? 'hot' : st === 'soon' ? 'warm' : '';
+      rows += '<div class="lrow" data-edit="' + esc(t.id) + '" title="点击编辑">'
+           +   '<span class="llabel"><b>' + esc(p.name) + '</b> · ' + fmt(t.amount) + '</span>'
+           +   '<div class="track">'
+           +     '<div class="fill ' + st + '" style="width:' + pct + '%"></div>'
+           +     (st === 'expired' ? '' : '<div class="cap" style="left:calc(' + pct + '% - 2px)"></div>')
+           +   '</div>'
+           +   '<span class="lright ' + rightCls + '">' + (st === 'expired' ? '已过期' : shortDate(t.expiry) + ' · ' + d + '天') + '</span>'
+           + '</div>';
+    });
+    document.getElementById('ladderRows').innerHTML = rows || '<div class="empty">暂无记录</div>';
+  }
+
+  function renderAll(){
+    renderStats();
+    renderProviders();
+    renderQueue();
+    renderLadder();
+    document.getElementById('sampleBanner').style.display = state.seeded ? 'flex' : 'none';
+  }
+
+  /* ---------------- editor dialog ---------------- */
+  var dlg = document.getElementById('editor');
+  var editingId = null;
+
+  function fillProviderSelect(selected){
+    var sel = document.getElementById('fProvider');
+    sel.innerHTML = state.providers.map(function(p){
+      return '<option value="' + esc(p.id) + '">' + esc(p.name) + '</option>';
+    }).join('') + '<option value="__custom">＋ 自定义平台…</option>';
+    sel.value = selected || state.providers[0].id;
+    syncCustomField();
+  }
+  function syncCustomField(){
+    var isCustom = document.getElementById('fProvider').value === '__custom';
+    document.getElementById('customNameField').style.display = isCustom ? 'flex' : 'none';
+  }
+  function openEditor(mode, payload){
+    document.getElementById('formErr').textContent = '';
+    var isEdit = mode === 'edit';
+    editingId = isEdit ? payload.id : null;
+    document.getElementById('dlgTitle').textContent = isEdit ? '编辑这笔积分' : '记一笔积分';
+    document.getElementById('btnDelete').style.display = isEdit ? 'inline-block' : 'none';
+
+    fillProviderSelect(isEdit ? payload.providerId : (payload && payload.providerId) || '');
+    document.getElementById('fCustomName').value = '';
+    document.getElementById('fAmount').value = isEdit ? payload.amount : '';
+    document.getElementById('fUnit').value = isEdit ? unitOf(payload) : (providerOf(document.getElementById('fProvider').value).unit || '积分');
+    document.getElementById('fExpiry').value = isEdit ? payload.expiry : addDays(30);
+    document.getElementById('fNote').value = isEdit ? (payload.note || '') : '';
+
+    dlg.showModal();
+    setTimeout(function(){ document.getElementById('fAmount').focus(); }, 60);
+  }
+  function closeEditor(){ dlg.close(); editingId = null; }
+
+  document.getElementById('fProvider').addEventListener('change', function(){
+    syncCustomField();
+    var p = providerOf(this.value);
+    document.getElementById('fUnit').value = p.unit || '积分';
+    if(this.value === '__custom'){
+      document.getElementById('fExpiry').value = document.getElementById('fExpiry').value || addDays(30);
+    }
+  });
+  document.getElementById('btnCancel').addEventListener('click', closeEditor);
+  dlg.addEventListener('click', function(e){
+    if(e.target === dlg) closeEditor();
+  });
+  dlg.addEventListener('cancel', function(e){ e.preventDefault(); closeEditor(); });
+
+  document.getElementById('editForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var err = document.getElementById('formErr');
+    var providerVal = document.getElementById('fProvider').value;
+    var amount = parseFloat(document.getElementById('fAmount').value);
+    var unit = document.getElementById('fUnit').value.trim() || '积分';
+    var expiry = document.getElementById('fExpiry').value;
+    var note = document.getElementById('fNote').value.trim();
+
+    if(!Number.isFinite(amount) || amount <= 0){ err.textContent = '请填写大于 0 的数量。'; return; }
+    if(!expiry){ err.textContent = '请选择有效期。'; return; }
+
+    var providerId = providerVal;
+    if(providerVal === '__custom'){
+      var name = document.getElementById('fCustomName').value.trim();
+      if(!name){ err.textContent = '请填写自定义平台名称。'; return; }
+      var existed = state.providers.filter(function(p){ return p.name === name; })[0];
+      if(existed){
+        providerId = existed.id;
+      } else {
+        providerId = 'p-' + uid().slice(0, 8);
+        var palette = ['#8FB98A','#9FB4D8','#C9A15E','#B78FA0','#7FA6A0','#D08770'];
+        state.providers.push({
+          id: providerId, name: name, unit: unit,
+          accent: palette[state.providers.length % palette.length]
+        });
+      }
+    }
+
+    var known = state.providers.some(function(p){ return p.id === providerId; });
+    if(!known) providerId = state.providers[0].id;
+
+    if(editingId){
+      var t = state.tranches.filter(function(x){ return x.id === editingId; })[0];
+      if(t){
+        t.providerId = providerId; t.amount = amount; t.unit = unit;
+        t.expiry = expiry; t.note = note;
+      }
+      toast('已更新');
+    } else {
+      state.tranches.push({
+        id: uid(), providerId: providerId, amount: amount, unit: unit,
+        expiry: expiry, note: note
+      });
+      toast('已记入账本');
+    }
+    state.seeded = false;
+    save();
+    closeEditor();
+    renderAll();
+  });
+
+  document.getElementById('btnDelete').addEventListener('click', function(){
+    if(!editingId) return;
+    deleteTranche(editingId);
+    closeEditor();
+  });
+
+  function deleteTranche(id){
+    state.tranches = state.tranches.filter(function(t){ return t.id !== id; });
+    save();
+    renderAll();
+    toast('已删除');
+  }
+
+  /* ---------------- global events ---------------- */
+  document.addEventListener('click', function(e){
+    var el = e.target.closest('[data-edit],[data-del],[data-add]');
+    if(!el) return;
+    if(el.hasAttribute('data-add')){
+      openEditor('new', { providerId: el.getAttribute('data-add') });
+      return;
+    }
+    if(el.hasAttribute('data-del')){
+      var id1 = el.getAttribute('data-del');
+      var t = state.tranches.filter(function(x){ return x.id === id1; })[0];
+      if(t && confirm('删除这笔 ' + providerOf(t.providerId).name + ' ' + fmt(t.amount) + ' ' + unitOf(t) + ' 的记录？')){
+        deleteTranche(id1);
+      }
+      return;
+    }
+    var editId = el.getAttribute('data-edit');
+    var item = state.tranches.filter(function(x){ return x.id === editId; })[0];
+    if(item) openEditor('edit', item);
+  });
+
+  document.getElementById('btnAdd').addEventListener('click', function(){ openEditor('new', { providerId: state.providers[0].id }); });
+
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'n' && !e.metaKey && !e.ctrlKey && !e.altKey && !dlg.open && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'SELECT'){
+      openEditor('new', { providerId: state.providers[0].id });
+    }
+  });
+
+  /* ---------------- import / export / reset ---------------- */
+  document.getElementById('btnExport').addEventListener('click', function(){
+    var payload = JSON.stringify({ version:1, exportedAt:new Date().toISOString(), providers:state.providers, tranches:state.tranches, seeded:false }, null, 2);
+    var blob = new Blob([payload], { type:'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'credit-ledger-' + isoDate(new Date()) + '.json';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 800);
+    toast('已导出 JSON');
+  });
+
+  document.getElementById('btnImport').addEventListener('click', function(){
+    document.getElementById('fileInput').click();
+  });
+
+  document.getElementById('fileInput').addEventListener('change', function(e){
+    var file = e.target.files && e.target.files[0];
+    if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(){
+      try{
+        var data = JSON.parse(String(reader.result));
+        if(!data || !Array.isArray(data.tranches)) throw new Error('bad shape');
+        var valid = data.tranches.filter(function(t){
+          return t && typeof t.providerId === 'string' && typeof t.expiry === 'string' && Number.isFinite(Number(t.amount));
+        }).map(function(t){
+          return {
+            id: t.id || uid(), providerId: t.providerId, amount: Number(t.amount),
+            unit: t.unit || '积分', expiry: t.expiry, note: t.note || '',
+            source: t.source === 'auto' ? 'auto' : 'manual'
+          };
+        });
+        if(!valid.length) throw new Error('empty');
+        var palette = ['#E0B25C','#7FA6A0','#A98FC0','#D08770','#8FBE93','#9FB4D8'];
+        var provs = (Array.isArray(data.providers) && data.providers.length) ? data.providers : clone(DEFAULT_PROVIDERS);
+        state.providers = provs.filter(function(p){ return p && p.id; }).map(function(p, i){
+          return {
+            id: p.id, name: p.name || p.id, unit: p.unit || '积分',
+            accent: p.accent || palette[i % palette.length]
+          };
+        });
+        if(!state.providers.length) state.providers = clone(DEFAULT_PROVIDERS);
+        state.tranches = valid;
+        state.seeded = false;
+        save();
+        renderAll();
+        toast('已导入 ' + valid.length + ' 笔');
+      }catch(err){
+        alert('导入失败：文件不是有效的工作台数据。');
+      }finally{
+        e.target.value = '';
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  document.getElementById('btnClearSample').addEventListener('click', function(){
+    state.tranches = [];
+    state.seeded = false;
+    save();
+    renderAll();
+    toast('示例已清空');
+  });
+
+  document.getElementById('btnResetSample').addEventListener('click', function(){
+    if(!confirm('将用示例数据覆盖当前记录，确定？')) return;
+    seed();
+    renderAll();
+    toast('示例数据已恢复');
+  });
+
+  document.getElementById('btnWipe').addEventListener('click', function(){
+    if(!state.tranches.length){ toast('已经是空的'); return; }
+    if(!confirm('清空全部 ' + state.tranches.length + ' 笔记录？此操作不可撤销（建议先导出）。')) return;
+    state.tranches = [];
+    state.seeded = false;
+    save();
+    renderAll();
+    toast('已清空');
+  });
+
+  /* ---------------- toast ---------------- */
+  var toastTimer = null;
+  function toast(msg){
+    var el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ el.classList.remove('show'); }, 1800);
+  }
+
+  /* ---------------- sync ---------------- */
+  var SYNC_BASE = 'http://127.0.0.1:8797';
+  var SYNC = { reachable:false, state:null, results:null, lastSync:null, syncing:false, wbTimer:null };
+  var dlgSync = document.getElementById('syncDialog');
+
+  function syncRequest(path, options, timeoutMs){
+    var ctrl = new AbortController();
+    var timer = setTimeout(function(){ ctrl.abort(); }, timeoutMs || 8000);
+    var opts = options || {};
+    opts.signal = ctrl.signal;
+    return fetch(SYNC_BASE + path, opts).then(function(res){
+      return res.text().then(function(text){
+        var data = null;
+        try{ data = JSON.parse(text); }catch(e){}
+        if(!res.ok) throw new Error((data && data.message) || ('HTTP ' + res.status));
+        return data;
+      });
+    }).finally(function(){ clearTimeout(timer); });
+  }
+
+  function platformLabel(p){
+    return p === 'workbuddy' ? 'WORKBUDDY' : p === 'qoder' ? 'QODER' : 'TRAE';
+  }
+  function platformShort(r){
+    if(r.ok) return ((r.tranches || []).length) + ' 笔';
+    var waiting = ['NEED_LOGIN','NEED_CONFIG','TOKEN_INVALID','COOKIE_INVALID','COOKIE_EXPIRED'];
+    return waiting.indexOf(r.code) !== -1 ? '待连接' : '失败';
+  }
+
+  function renderSyncBar(){
+    var dot = document.getElementById('syncDot');
+    var text = document.getElementById('syncText');
+    var list = document.getElementById('syncList');
+    dot.className = 'sync-dot';
+    if(!SYNC.reachable){
+      dot.classList.add('err');
+      text.textContent = '同步服务未启动 · 双击「启动积分工作台.cmd」';
+      list.innerHTML = '';
+      return;
+    }
+    if(!SYNC.results){
+      dot.classList.add('warn');
+      text.textContent = '同步服务已连接，点「同步」拉取最新额度';
+      list.innerHTML = '';
+      return;
+    }
+    var anyOk = SYNC.results.some(function(r){ return r.ok; });
+    dot.classList.add(anyOk ? 'ok' : 'err');
+    var when = SYNC.lastSync ? (pad(SYNC.lastSync.getHours()) + ':' + pad(SYNC.lastSync.getMinutes())) : '';
+    text.textContent = '最近同步 ' + when;
+    list.innerHTML = SYNC.results.map(function(r){
+      var cls = r.ok ? 'ok' : (platformShort(r) === '待连接' ? 'warn' : 'err');
+      return '<button class="sync-item ' + cls + '" data-syncopen="1" type="button" title="' + esc(r.message || '') + '">' +
+             '<i></i><b>' + platformLabel(r.platform) + '</b> ' + platformShort(r) + '</button>';
+    }).join('');
+  }
+
+  function fillSyncDialog(){
+    var s = SYNC.state;
+    var traeEl = document.getElementById('traeState');
+    var wbEl = document.getElementById('wbState');
+    var qoderEl = document.getElementById('qoderState');
+    var err = document.getElementById('syncError');
+    var wbBtn = document.getElementById('wbConnect');
+    var wbOff = document.getElementById('wbDisconnect');
+
+    if(!SYNC.reachable){
+      traeEl.textContent = '同步服务未启动';
+      wbEl.textContent = '同步服务未启动';
+      qoderEl.textContent = '同步服务未启动';
+      err.textContent = '同步服务没在运行：请双击项目里的「启动积分工作台.cmd」，再点「保存并同步」。';
+      return;
+    }
+
+    err.textContent = '';
+    if(s && s.trae && s.trae.available){
+      var exp = s.trae.expiresAt ? new Date(s.trae.expiresAt) : null;
+      if(s.trae.expired){
+        traeEl.innerHTML = '<strong>登录已过期</strong>，请打开一次 TRAE 客户端';
+      } else {
+        traeEl.innerHTML = '已检测到 ' + esc(s.trae.product || 'TRAE') + ' 登录态<em> · 有效至 ' +
+          (exp ? (exp.getMonth() + 1) + '-' + exp.getDate() : '未知') + '</em>';
+      }
+    } else {
+      traeEl.textContent = '未检测到本机 TRAE 登录态';
+    }
+
+    var wb = s && s.config && s.config.workbuddy;
+    if(wb && wb.connected){
+      var wbExp = wb.expiresAt ? new Date(wb.expiresAt) : null;
+      wbEl.innerHTML = '已连接<em>' + (wbExp ? ' · 凭证至 ' + (wbExp.getMonth() + 1) + '-' + wbExp.getDate() : '') + '</em>';
+      wbBtn.textContent = '重新登录';
+      wbOff.style.display = 'inline-block';
+    } else {
+      wbEl.textContent = '未连接，点右侧“连接”在浏览器完成一次登录';
+      wbBtn.textContent = '连接';
+      wbOff.style.display = 'none';
+    }
+
+    var qoderConfigured = !!(s.config && s.config.qoder && s.config.qoder.configured);
+    qoderEl.innerHTML = qoderConfigured
+      ? '已配置访问令牌<em> · 保存后可验证</em>'
+      : '自动读取 Qoder CN 登录态（需先打开 Qoder 登录）';
+    document.getElementById('qoderClear').style.display = qoderConfigured ? 'inline-block' : 'none';
+  }
+
+  function refreshSyncState(){
+    return syncRequest('/api/state', { method:'GET' }, 4000).then(function(data){
+      SYNC.reachable = true;
+      SYNC.state = data;
+      renderSyncBar();
+      fillSyncDialog();
+      return true;
+    }).catch(function(){
+      SYNC.reachable = false;
+      SYNC.state = null;
+      renderSyncBar();
+      fillSyncDialog();
+      return false;
+    });
+  }
+
+  function applySyncResults(results){
+    if(!results || !results.length) return;
+    var anyOk = results.some(function(r){ return r.ok; });
+    if(!anyOk) return;
+    if(state.seeded){ state.tranches = []; state.seeded = false; }
+    results.forEach(function(r){
+      if(!r.ok) return;
+      state.tranches = state.tranches.filter(function(t){
+        return !(t.source === 'auto' && t.providerId === r.platform);
+      });
+      (r.tranches || []).forEach(function(t){
+        state.tranches.push({
+          id: t.id || uid(),
+          providerId: t.providerId || r.platform,
+          amount: Number(t.amount),
+          unit: t.unit || '积分',
+          expiry: t.expiry,
+          note: t.note || '',
+          source: 'auto'
+        });
+      });
+    });
+    save();
+    renderAll();
+  }
+
+  function runSync(silent){
+    if(SYNC.syncing) return Promise.resolve();
+    SYNC.syncing = true;
+    var btn = document.getElementById('btnSync');
+    var old = btn.textContent;
+    if(!silent){ btn.disabled = true; btn.textContent = '同步中…'; }
+    return syncRequest('/api/sync', { method:'GET' }, 60000).then(function(data){
+      SYNC.reachable = true;
+      SYNC.results = data.results || [];
+      SYNC.lastSync = new Date();
+      applySyncResults(SYNC.results);
+      renderSyncBar();
+      fillSyncDialog();
+      if(!silent){
+        var okCount = SYNC.results.filter(function(r){ return r.ok; }).length;
+        toast(okCount ? ('同步完成 · ' + okCount + ' 个平台') : '没有平台同步成功');
+      }
+    }).catch(function(e){
+      SYNC.reachable = false;
+      renderSyncBar();
+      fillSyncDialog();
+      if(!silent) toast(e && e.name === 'AbortError' ? '同步超时' : '同步服务未启动');
+    }).finally(function(){
+      SYNC.syncing = false;
+      if(!silent){ btn.disabled = false; btn.textContent = old; }
+    });
+  }
+
+  function openSyncDialog(){
+    if(!dlgSync.open) dlgSync.showModal();
+    refreshSyncState();
+  }
+
+  function startWbLogin(){
+    var box = document.getElementById('wbLoginBox');
+    var err = document.getElementById('syncError');
+    if(!SYNC.reachable){
+      err.textContent = '同步服务没在运行：请先双击「启动积分工作台.cmd」，再点连接。';
+      return;
+    }
+    err.textContent = '';
+    box.classList.add('show');
+    box.textContent = '正在获取授权链接…';
+    var popup = null;
+    try{ popup = window.open('about:blank', '_blank'); }catch(e){ /* 被拦截时走下方链接 */ }
+    syncRequest('/api/login/workbuddy/start', {
+      method:'POST', headers:{ 'Content-Type':'application/json' }, body:'{}'
+    }, 15000).then(function(ticket){
+      if(popup){ try{ popup.location.href = ticket.loginUrl; }catch(e){ popup = null; } }
+      box.innerHTML = '已打开授权页面。若没有自动打开，请<a href="' + esc(ticket.loginUrl) +
+        '" target="_blank" rel="noopener" style="color:var(--gold)">点此打开</a>并完成登录，页面会自动继续。';
+      pollWbLogin(ticket.state, 0);
+    }).catch(function(e){
+      if(popup){ try{ popup.close(); }catch(err2){ /* 忽略 */ } }
+      box.textContent = '获取授权链接失败：' + (e.message || '未知错误');
+    });
+  }
+
+  function pollWbLogin(state, attempt){
+    clearTimeout(SYNC.wbTimer);
+    if(attempt > 150) return;
+    SYNC.wbTimer = setTimeout(function(){
+      syncRequest('/api/login/workbuddy/poll?state=' + encodeURIComponent(state), { method:'GET' }, 15000)
+        .then(function(r){
+          var box = document.getElementById('wbLoginBox');
+          if(r.status === 'ok'){
+            box.innerHTML = '<span style="color:var(--green)">WorkBuddy 已连接</span>，正在拉取积分…';
+            refreshSyncState().then(function(){ return runSync(true); });
+            return;
+          }
+          if(r.status === 'expired'){
+            box.textContent = '登录会话已过期，请重新点击“连接”。';
+            return;
+          }
+          box.innerHTML = '等待浏览器完成登录…（' + (attempt * 2) + 's）';
+          pollWbLogin(state, attempt + 1);
+        })
+        .catch(function(){
+          if(attempt < 150) pollWbLogin(state, attempt + 1);
+          else document.getElementById('wbLoginBox').textContent = '轮询失败，请重试。';
+        });
+    }, 2000);
+  }
+
+  document.getElementById('btnSync').addEventListener('click', function(){
+    if(!SYNC.reachable){ openSyncDialog(); return; }
+    runSync(false);
+  });
+  document.getElementById('btnSyncSettings').addEventListener('click', openSyncDialog);
+  document.getElementById('btnSyncClose').addEventListener('click', function(){ dlgSync.close(); });
+  dlgSync.addEventListener('click', function(e){ if(e.target === dlgSync) dlgSync.close(); });
+  dlgSync.addEventListener('close', function(){ clearTimeout(SYNC.wbTimer); });
+  document.getElementById('syncList').addEventListener('click', function(e){
+    if(e.target.closest('[data-syncopen]')) openSyncDialog();
+  });
+
+  document.getElementById('wbConnect').addEventListener('click', startWbLogin);
+
+  document.getElementById('wbDisconnect').addEventListener('click', function(){
+    syncRequest('/api/config', {
+      method:'POST', headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({ workbuddy: { disconnect: true } })
+    }, 8000).then(function(){
+      toast('已断开 WorkBuddy');
+      document.getElementById('wbLoginBox').classList.remove('show');
+      refreshSyncState();
+    }).catch(function(e){ toast(e.message || '操作失败'); });
+  });
+
+  document.getElementById('qoderClear').addEventListener('click', function(){
+    syncRequest('/api/config', {
+      method:'POST', headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({ qoderToken: '' })
+    }, 8000).then(function(){ toast('已清除 Qoder 令牌'); refreshSyncState(); })
+      .catch(function(e){ toast(e.message || '操作失败'); });
+  });
+
+  document.getElementById('syncForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var err = document.getElementById('syncError');
+    var qoderToken = document.getElementById('qoderToken').value.trim();
+    var payload = {};
+    if(qoderToken) payload.qoderToken = qoderToken;
+
+    if(!SYNC.reachable){
+      err.textContent = '同步服务没在运行：请先双击「启动积分工作台.cmd」。';
+      return;
+    }
+    if(!Object.keys(payload).length){ dlgSync.close(); runSync(false); return; }
+
+    syncRequest('/api/config', {
+      method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(payload)
+    }, 10000).then(function(){
+      document.getElementById('qoderToken').value = '';
+      return refreshSyncState();
+    }).then(function(){
+      dlgSync.close();
+      runSync(false);
+    }).catch(function(e){
+      err.textContent = '保存失败：' + (e.message || '未知错误');
+    });
+  });
+
+  /* ---------------- init ---------------- */
+  load();
+  renderAll();
+  refreshSyncState().then(function(ok){ if(ok) runSync(true); });
+})();
+</script>
+<script>
+(function(){
+  var KEY = 'credit-ledger-theme', root = document.documentElement;
+  var btn = document.getElementById('btnTheme');
+  if(!btn) return;
+  function sync(){
+    var dark = root.getAttribute('data-theme') === 'dark';
+    btn.title = dark ? '切换到浅色模式' : '切换到深色模式';
+    btn.setAttribute('aria-label', btn.title);
+  }
+  sync();
+  btn.addEventListener('click', function(){
+    var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try{ localStorage.setItem(KEY, next); }catch(e){}
+    sync();
+  });
+})();
+</script>
+</body>
+</html>
