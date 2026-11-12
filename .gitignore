@@ -1,0 +1,10 @@
+# 本地凭证 / 个人数据：切勿提交
+sync/config.json
+*.zip
+*.log
+node_modules/
+
+# 本机工作数据
+.workbuddy/
+.screenshots/
+.trae-html-share-packages/
